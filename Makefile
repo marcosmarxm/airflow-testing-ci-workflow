@@ -9,5 +9,5 @@ up:
 down:
 	docker-compose down
 
-test:
-	pytest
+testing:
+	docker exec tester pytest
