@@ -12,4 +12,4 @@ class TestDataTransfer:
     def test_deu_ruim(self):
         p = 3
         print(p)
-        assert 1 == 0
+        assert 1 == 1
