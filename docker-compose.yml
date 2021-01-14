@@ -1,0 +1,88 @@
+version: '3.6'
+services:
+
+
+  airflow-metastore:
+      image: postgres:12
+      container_name: airflow-metastore
+      environment:
+          - POSTGRES_USER=${POSTGRES_USER}
+          - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+          - POSTGRES_DB=${POSTGRES_DB}         
+      ports:
+        - "5432:5432"
+
+
+  airflow-webserver:
+      image: ${REPO}:master-python3.7
+      container_name: airflow-webserver
+      depends_on: 
+        - airflow-scheduler
+        - airflow-metastore
+      volumes:
+        - ./dags:/opt/airflow/dags
+        - ./sql:/opt/airflow/sql
+      environment: 
+          - AIRFLOW__CORE__FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+          - AIRFLOW__CORE__EXECUTOR=${EXECUTOR}
+          - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+          - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
+      ports:
+        - "8080:8080"
+      command: 'bash -c "airflow webserver"'
+
+
+  airflow-scheduler:
+      image: ${REPO}:master-python3.7
+      container_name: airflow-scheduler
+      depends_on: 
+          - airflow-metastore
+      volumes:
+        - ./dags:/opt/airflow/dags
+        - ./sql:/opt/airflow/sql
+      environment:
+          - AIRFLOW__CORE__FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+          - AIRFLOW__CORE__EXECUTOR=${EXECUTOR}
+          - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+          - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
+      command: 'bash -c "airflow db init && airflow scheduler"'
+
+
+  source-db:
+    image: postgres:11.4-alpine
+    restart: always
+    container_name: source-db
+    ports:
+      - "54320:54320"
+    volumes:
+      - ./mnt/postgres-db/source.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=source
+
+
+  dest-db:
+    image: postgres:11.4-alpine
+    restart: always
+    container_name: dest-db
+    ports:
+        - "54321:54321"
+    volumes:
+        - ./mnt/postgres-db/dest.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+        - POSTGRES_USER=root
+        - POSTGRES_PASSWORD=root
+        - POSTGRES_DB=dest
+
+
+  tester:
+    image: python:3.8.7-buster
+    container_name: tester
+    depends_on:
+      - source-db
+      - dest-db
+    volumes:
+        - ./mnt/python-tester:/usr/src/app
+    working_dir: /usr/src/app
+    command: 'bash -c "pip3 install -r requirements.txt && tail -f /dev/null"'
