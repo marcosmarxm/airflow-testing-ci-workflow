@@ -15,8 +15,14 @@ jobs:
     - name: Make envfile
       uses: SpicyPizza/create-envfile@v1
       with:
-        envkey_EXECUTOR: LocalExecutor
-        envkey_REPO: apache/airflow
+        envkey_EXECUTOR: "LocalExecutor"
+        envkey_REPO: "apache/airflow"
+        envkey_AIRFLOW_ENV: "dev"
+        envkey_POSTGRES_USER: "airflow"
+        envkey_POSTGRES_PASSWORD: "airflow"
+        envkey_POSTGRES_DB: "airflow"
+        envkey_POSTGRES_PORT: "5432"
+        envkey_POSTGRES_HOST: "airflow-metastore"
         file_name: .env
 
     - uses: actions/checkout@v2
