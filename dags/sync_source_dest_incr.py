@@ -8,9 +8,10 @@ from airflow.utils.dates import days_ago
 default_args = {
     'owner': 'airflow',
 }
-@dag(default_args=default_args, schedule_interval='@daily', start_date=days_ago(2), tags=['example'])
+@dag(default_args=default_args, schedule_interval=None, start_date=days_ago(2), tags=['example'])
 def sync_source_dest_incremental():
 
+    
     @task()
     def get_last_date_sync():
 
@@ -33,7 +34,7 @@ def sync_source_dest_incremental():
 
     @task()
     def load(total_order_value: float):
-
+        # apply some transformations like Capitalize Products 
         print("Total order value is: %.2f" % total_order_value)
 
 
@@ -41,8 +42,5 @@ def sync_source_dest_incremental():
     last_date = get_last_date_sync()
     order_summary = transfer_data_source_to_dest(last_date)
     load(order_summary["total_order_value"])
-    sec_load = second_load(order_summary)
-    after_second_load = func_after_second_load()
-    sec_load >> after_second_load
 
 sync_source_dest_incr_dag = sync_source_dest_incremental()
