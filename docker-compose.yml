@@ -1,7 +1,6 @@
 version: '3.6'
 services:
 
-
   airflow-metastore:
       image: postgres:12
       container_name: airflow-metastore
@@ -11,7 +10,6 @@ services:
           - POSTGRES_DB=${POSTGRES_DB}         
       ports:
         - "5432:5432"
-
 
   airflow-webserver:
       image: ${REPO}:master-python3.7
@@ -26,11 +24,9 @@ services:
           - AIRFLOW__CORE__FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
           - AIRFLOW__CORE__EXECUTOR=${EXECUTOR}
           - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-          - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
       ports:
         - "8080:8080"
       command: 'bash -c "airflow webserver"'
-
 
   airflow-scheduler:
       image: ${REPO}:master-python3.7
@@ -47,7 +43,6 @@ services:
           - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
       command: 'bash -c "airflow db init && airflow scheduler"'
 
-
   source-db:
     image: postgres:11.4-alpine
     restart: always
@@ -55,12 +50,11 @@ services:
     ports:
       - "54320:54320"
     volumes:
-      - ./mnt/postgres-db/source.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./mnt/mock-db/table_init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=source
-
+      - POSTGRES_USER=${SOURCE_USER}
+      - POSTGRES_PASSWORD=${SOURCE_PASSWORD}
+      - POSTGRES_DB=${SOURCE_DB}
 
   dest-db:
     image: postgres:11.4-alpine
@@ -69,12 +63,11 @@ services:
     ports:
         - "54321:54321"
     volumes:
-        - ./mnt/postgres-db/dest.sql:/docker-entrypoint-initdb.d/init.sql
+        - ./mnt/mock-db/table_init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
-        - POSTGRES_USER=root
-        - POSTGRES_PASSWORD=root
-        - POSTGRES_DB=dest
-
+        - POSTGRES_USER=${DEST_USER}
+        - POSTGRES_PASSWORD=${DEST_PASSWORD}
+        - POSTGRES_DB=${DEST_DB}
 
   tester:
     image: python:3.8.7-buster

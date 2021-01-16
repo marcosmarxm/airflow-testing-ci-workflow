@@ -10,4 +10,5 @@ down:
 	docker-compose down
 
 testing:
+	docker exec airflow-scheduler airflow dags backfill -s 2019-01-01 sync_source_dest_incr_dag 
 	docker exec tester pytest
