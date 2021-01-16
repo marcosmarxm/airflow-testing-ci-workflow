@@ -1,4 +1,4 @@
-up:
+setup:
 	docker-compose up -d --force-recreate --remove-orphans
 	sleep 15
 	docker exec airflow-webserver airflow users create --username admin --password admin --role Admin --firstname Ademir --lastname Junior --email admin@email.com
@@ -9,6 +9,8 @@ up:
 down:
 	docker-compose down
 
-testing:
-	docker exec airflow-scheduler airflow dags backfill -s 2019-01-01 sync_source_dest_incr_dag 
-	docker exec tester pytest
+run: 
+	docker exec airflow-scheduler airflow dags backfill -s 2019-01-01 sync_source_dest_incremental 
+	
+tests:
+	docker exec tester pytest -vv
