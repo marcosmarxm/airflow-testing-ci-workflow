@@ -1,3 +1,5 @@
+include .env
+
 setup:
 	docker-compose up -d --force-recreate --remove-orphans
 	sleep 240
