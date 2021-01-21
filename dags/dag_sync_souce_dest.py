@@ -7,7 +7,10 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 default_args = {
     'owner': 'airflow',
 }
-@dag(default_args=default_args, schedule_interval=None, start_date=days_ago(2), tags=['extract_load', 'sales'])
+@dag(default_args=default_args, 
+    schedule_interval=None,
+    start_date=days_ago(2),
+    tags=['extract_load', 'sales'])
 def sync_source_dest_incremental():
 
     @task()
