@@ -16,15 +16,12 @@ def sync_source_dest_incremental():
         last_update_date = dest_hook.get_first(
             'select max("purchaseDate") from transactions'
         )[0]
-        print(last_update_date)
-        print(type(last_update_date))
         return last_update_date
 
     @task()
     def transfer_data_source_to_dest(last_update_date: str):
         source_hook = PostgresHook(postgres_conn_id='source')
         dest_hook = PostgresHook(postgres_conn_id='dest')
-
         data = source_hook.get_records(
             'select * from transactions where "purchaseDate" > %(last_update)s',
             parameters={'last_update': last_update_date}
@@ -33,7 +30,6 @@ def sync_source_dest_incremental():
 
 
     last_update = get_last_date_sync()
-    print(last_update)
     transfer_data_source_to_dest(last_update)
     
 
