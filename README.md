@@ -44,3 +44,4 @@ Some resources about Airflow testing and DataOps:
 * [Testing and Debugging in Apache Airflow by GoDataDriven](https://godatadriven.com/blog/testing-and-debugging-apache-airflow/)
 * [The Challenge of Testing Data Pipelines](https://medium.com/slalom-build/the-challenge-of-testing-data-pipelines-4450744a84f1)
 * [Automated Testing for Proceting Data Pipeliens from Undocumented Assumptions](https://www.youtube.com/watch?v=z-kPgEAJCrA&ab_channel=Databricks)
+* [Why Great Data Engineering Needs Automated Testing](https://medium.com/weareservian/why-data-engineering-needs-automated-testing-a37a0844d7db)
