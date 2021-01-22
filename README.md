@@ -11,9 +11,9 @@ Below is a summary of what will be accomplished in this project. We simulate the
 To assist in the development we use a local development environment and also CI integration with Github Action. Below is the sequence of execution of the stages of operations in the project.
 
 ![Containers](./assets/images/localenvsetup.png)
-- Airflow: container running local setup for dev;
-- source-db and dest-db: container that simulate banks in a production environment and receive fake data;
-- handler: python image that has scripts for initial data loading and also serves as a "controlled environment" for testing.
+- **Airflow**: container running local setup for dev;
+- **source-db** and **dest-db**: container that simulate banks in a production environment and receive fake data;
+- **handler**: python image that has scripts for initial data loading and also serves as a "controlled environment" for testing.
 
 ### Dependencies?
 Docker, docker-compose and makefile.
