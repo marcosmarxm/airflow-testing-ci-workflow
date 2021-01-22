@@ -4,10 +4,7 @@ from airflow.utils.dates import days_ago
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 
-default_args = {
-    'owner': 'airflow',
-}
-@dag(default_args=default_args, 
+@dag(default_args={'owner': 'airflow'}, 
     schedule_interval=None,
     start_date=days_ago(2),
     tags=['extract_load', 'sales'])
