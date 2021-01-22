@@ -5,34 +5,33 @@ I suggest you to read to better understand the code and the way I think how to s
 
 ## The project
 
-Abaixo é representado de forma resumida o que será realizado nesse projeto. Simulamos a transferia de dados fictcios de transações de um ecommerce do banco source-db para o banco dest-db.
-
+Below is a summary of what will be accomplished in this project. We simulate the transfer of fictitious transaction data from an ecommerce from the `source-db` database to the `dest-db` database.
 ![Macro Worflow of the Project](./assets/images/macroflow.png)
 
-Para auxiliar no desenvolvimento utilizamos um ambiente de desenvolvimento local e também integração CI com o Github Action. Abaixo segue a sequencia de execução do fluxo de operaçoes no projeto.
+To assist in the development we use a local development environment and also CI integration with Github Action. Below is the sequence of execution of the stages of operations in the project.
 
 ![Containers](./assets/images/localenvsetup.png)
-- Airflow: container rodando setup local para dev;
-- source-db e dest-db: container que simulam os bancos em ambiente de produçao e recebem os dados fake;
-- handler: imagem python que possui scripts para carga inicial dos dados e também serve como "ambiente controlado" para testes.
+- Airflow: container running local setup for dev;
+- source-db and dest-db: container that simulate banks in a production environment and receive fake data;
+- handler: python image that has scripts for initial data loading and also serves as a "controlled environment" for testing.
 
 ### Dependencies?
 Docker, docker-compose and makefile.
 
 ### How to run?
 
-O comando abaixo irá subir o ambiente utilizando docker-compose. Aguardar alguns minutos (240s, yeah omg right?) para configuração correta do Airflow então criar as credenciais e conexões necessárias. Por ultimo realiza o insert dos dados iniciais nos bancos mock.
+The command below will raise the environment using docker-compose. Wait a few minutes (240s, yeah omg right?) For correct Airflow configuration then create the necessary credentials and connections. Finally, insert the initial data into the mock banks.
 ```
 make setup
 ```
-Rodando o comando acima é possivel acessar o Airflow no `localhost:8080`. É criado um usuario de test user:admin/password:admin. Nesse estagio você pode desenvolver suas DAGs e ir testando elas conforme for modificando.
+By running the above command it is possible to access Airflow at `localhost: 8080`. A user of test user: admin / password: admin is created. At this stage you can develop your DAGs and test them as you modify them.
 
-O comando abaixo executa uma chamada para o Airflow rodar as DAGs que ja foram criadas e possuem testes. Caso você desenvolva uma nova DAGs você deve inserir ela aqui para quando rodar os testes e CI ela seja invocada.
+The command below executes a call for Airflow to run the DAGs that have already been created and have tests. If you develop a new DAG you must insert it here when you run the tests and CI it is invoked.
 ```
 make run
 ```
 
-E por ultimo o comando que chama o container handler para executar os testes.
+And finally, the command that calls the container handler to run the tests.
 ```
 make tests
 ```
