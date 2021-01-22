@@ -1,4 +1,5 @@
 version: '3.6'
+
 services:
 
   airflow-webserver:
@@ -9,7 +10,7 @@ services:
         - ./sql:/opt/airflow/sql
       environment: 
         - AIRFLOW_HOME=/opt/airflow
-        - AIRFLOW__CORE__FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+        - AIRFLOW__CORE__FERNET_KEY=${FERNET_KEY}
         - AIRFLOW__CORE__EXECUTOR=${EXECUTOR}
         - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
       ports:
@@ -42,13 +43,13 @@ services:
       - POSTGRES_PASSWORD=${DEST_PASSWORD}
       - POSTGRES_DB=${DEST_DB}
 
-  tester:
+  handler:
     image: python:3.8.7-buster
-    container_name: tester
+    container_name: handler
     depends_on:
       - source-db
       - dest-db
     volumes:
-      - ./mnt/python-tester:/usr/src/app
+      - ./mnt/python-handler:/usr/src/app
     working_dir: /usr/src/app
     command: 'bash -c "pip3 install -r requirements.txt && tail -f /dev/null"'
