@@ -46,10 +46,15 @@ services:
   handler:
     image: python:3.8.7-buster
     container_name: handler
+    env_file:
+      - .env
     depends_on:
       - source-db
       - dest-db
     volumes:
-      - ./mnt/python-handler:/usr/src/app
+      - ./data:/usr/src/app/data
+      - ./tests:/usr/src/app/tests
+      - ./scripts:/usr/src/app/scripts
+      - ./requirements:/usr/src/app/requirements
     working_dir: /usr/src/app
-    command: 'bash -c "pip3 install -r requirements.txt && tail -f /dev/null"'
+    command: 'bash -c "pip3 install -r requirements/handler.txt && tail -f /dev/null"'

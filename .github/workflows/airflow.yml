@@ -18,4 +18,4 @@ jobs:
     - name: Execute dags
       run: make run
     - name: Run tests
-      run: make tests
+      run: make testing
