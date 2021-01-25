@@ -45,3 +45,5 @@ Some resources about Airflow testing and DataOps:
 * [The Challenge of Testing Data Pipelines](https://medium.com/slalom-build/the-challenge-of-testing-data-pipelines-4450744a84f1)
 * [Automated Testing for Proceting Data Pipeliens from Undocumented Assumptions](https://www.youtube.com/watch?v=z-kPgEAJCrA&ab_channel=Databricks)
 * [Why Great Data Engineering Needs Automated Testing](https://medium.com/weareservian/why-data-engineering-needs-automated-testing-a37a0844d7db)
+* [Testing in Airflow Part 1 - DAG validation tests, DAG definition tests and unit tests](https://blog.usejournal.com/testing-in-airflow-part-1-dag-validation-tests-dag-definition-tests-and-unit-tests-2aa94970570c)
+* [Testing in Airflow Part 2 - Integration Tests and e2e Pipeline Tests](https://medium.com/@chandukavar/testing-in-airflow-part-2-integration-tests-and-end-to-end-pipeline-tests-af0555cd1a82)
