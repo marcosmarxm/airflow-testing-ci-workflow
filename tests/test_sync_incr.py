@@ -33,9 +33,9 @@ def execute_dag(dag_id, execution_date):
 class TestDataTransfer(TestCase):
 
     def setUp(self):
-        self.oltp_hook = PostgresHook('source')
-        self.olap_hook = PostgresHook('dest')
-        self.default_date = '2020-01-02'
+        self.oltp_hook = PostgresHook('oltp')
+        self.olap_hook = PostgresHook('olap')
+        self.default_date = '2020-01-05'
         self.transaction_table = 'transactions'
         self.product_table = 'products'
         self.product_sales_table = 'product_sales'
@@ -51,7 +51,7 @@ class TestDataTransfer(TestCase):
         logging.info("Setup OLAP database tables")
         create_table(self.product_table, self.olap_hook)
         create_table(self.transaction_table, self.olap_hook)
-        create_table(self.product_sales_table, self.olap_hook)
+        #create_table(self.product_sales_table, self.olap_hook)
 
         logging.info("Execute DAG")
         execute_dag('product_sales_pipeline', self.default_date)

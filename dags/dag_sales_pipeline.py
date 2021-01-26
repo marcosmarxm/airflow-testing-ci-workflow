@@ -16,18 +16,18 @@ def render_sql_file(filepath):
      tags=['etl', 'analytics', 'sales'])
 def product_sales_pipeline():
 
-    @task()
-    def get_execution_date():
-        return str(os.environ.get('AIRFLOW_CTX_EXECUTION_DATE')).split('T')[0]
+    # yes this is how to get execution date...
+    execution_date = '{{ ds }}'
 
     @task()
     def transfer_transaction_data(date: str):
         """Get records from transaction table for a specific date"""
+        print(f'The exec date called is: {date}')
         oltp_hook = PostgresHook(postgres_conn_id='oltp')
         olap_hook = PostgresHook(postgres_conn_id='olap')
         data = oltp_hook.get_records(
             sql=render_sql_file('/sales/get_transaction.sql'),
-            params={'date': date}
+            parameters={'date': date}
         )
         olap_hook.insert_rows('transactions', data, commit_every=1000)
 
@@ -40,8 +40,6 @@ def product_sales_pipeline():
             sql=render_sql_file('/sales/get_product.sql')
         )
         olap_hook.insert_rows('products', data, commit_every=1000)
-
-    execution_date = get_execution_date()
 
     delete_product_sales_exec_date = PostgresOperator(
         task_id='del_transaction_data_exec_date',
@@ -86,7 +84,7 @@ def product_sales_pipeline():
         sql='./sql/sales/clean_stg_product.sql'
     )
 
-    execution_date >> delete_product_sales_exec_date
+    #execution_date >> delete_product_sales_exec_date
     load_incremental_transaction_data = transfer_transaction_data(execution_date)
     load_full_product_data = transfer_product_data()
     [load_full_product_data, load_incremental_transaction_data, delete_product_sales_exec_date] >> join_transaction_product
