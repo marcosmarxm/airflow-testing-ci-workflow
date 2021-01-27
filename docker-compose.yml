@@ -1,3 +1,9 @@
+# Airflow está evoluindo rapidamente e por isso talvez o docker e comandos
+# utilizados aqui podem falhar num futuro proximo. O problema que enfrento
+# agora é ter que esperar alguns minutos até conseguir enviar comandos
+# para o Airflow. 
+# configurar um pipeline automatico para rodar semanalmente.
+
 version: '3.6'
 
 services:
@@ -15,9 +21,9 @@ services:
         - AIRFLOW_HOME=/opt/airflow
         - AIRFLOW__CORE__FERNET_KEY=${FERNET_KEY}
         - AIRFLOW__CORE__EXECUTOR=${EXECUTOR}
-        - AIRFLOW__API__AUTH_BACKEND=${AIRFLOW_API_BACKEND}
         - AIRFLOW__CORE__LOAD_EXAMPLES=false
         - AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=false
+        - AIRFLOW__API__AUTH_BACKEND=${AIRFLOW_API_BACKEND}
       ports:
         - 8080:8080
       command: 'bash -c "pip3 install -r requirements.txt && airflow db init && airflow webserver -D && airflow scheduler -D"'
@@ -28,8 +34,6 @@ services:
     container_name: source-db
     ports:
       - 54320:54320
-    volumes:
-      - ./mnt/mock-db/table_init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       - POSTGRES_USER=${SOURCE_USER}
       - POSTGRES_PASSWORD=${SOURCE_PASSWORD}
@@ -41,8 +45,6 @@ services:
     container_name: dest-db
     ports:
       - 54321:54321
-    volumes:
-      - ./mnt/mock-db/table_init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       - POSTGRES_USER=${DEST_USER}
       - POSTGRES_PASSWORD=${DEST_PASSWORD}

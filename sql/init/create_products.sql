@@ -1,6 +1,4 @@
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO root;
-
-CREATE TABLE transactions(
+CREATE TABLE IF NOT EXISTS products(
     orderId         INTEGER,
     purchaseDate    TEXT,
     userId          INTEGER,
