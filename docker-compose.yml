@@ -1,3 +1,9 @@
+# Airflow está evoluindo rapidamente e por isso talvez o docker e comandos
+# utilizados aqui podem falhar num futuro proximo. O problema que enfrento
+# agora é ter que esperar alguns minutos até conseguir enviar comandos
+# para o Airflow. 
+# configurar um pipeline automatico para rodar semanalmente.
+
 version: '3.6'
 
 services:

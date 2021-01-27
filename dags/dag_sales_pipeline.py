@@ -16,7 +16,6 @@ def render_sql_file(filepath):
      tags=['etl', 'analytics', 'sales'])
 def product_sales_pipeline():
 
-    # yes this is how to get execution date...
     execution_date = '{{ ds }}'
 
     @task()

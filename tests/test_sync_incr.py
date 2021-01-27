@@ -51,14 +51,14 @@ class TestDataTransfer(TestCase):
         logging.info("Setup OLAP database tables")
         create_table(self.product_table, self.olap_hook)
         create_table(self.transaction_table, self.olap_hook)
-        #create_table(self.product_sales_table, self.olap_hook)
+        create_table(self.product_sales_table, self.olap_hook)
 
         logging.info("Execute DAG")
         execute_dag('product_sales_pipeline', self.default_date)
 
         logging.info("Start tests")
         result = self.dest_hook.get_pandas_df(f'select * from {self.transaction_table}')
-        sample_data = get_csv_sample_as_df(self.transaction_table)
+        expected = get_csv_sample_as_df(self.transaction_table)
 
-        assert_frame_equal(result, sample_data)
+        assert_frame_equal(result, expected)
         assert len(result) == 6
