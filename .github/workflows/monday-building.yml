@@ -1,0 +1,18 @@
+# 
+name: CI
+
+on:
+  schedule:
+    - cron: "0 10 * * 1"
+  branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Create airflow env
+      run: make setup
+    - name: Run tests
+      run: make testing
