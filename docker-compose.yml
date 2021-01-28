@@ -13,7 +13,7 @@ services:
       container_name: airflow
       volumes:
         - ./dags:/opt/airflow/dags
-        - ./sql:/opt/airflow/sql
+        - ./sql:/opt/airflow/dags/sql
         - ./tests:/opt/airflow/tests
         - ./data:/opt/airflow/data
         - ./requirements.txt:/opt/airflow/requirements.txt
@@ -28,10 +28,10 @@ services:
         - 8080:8080
       command: 'bash -c "pip3 install -r requirements.txt && airflow db init && airflow webserver -D && airflow scheduler -D"'
 
-  source-db:
+  oltp-db:
     image: postgres:11.4-alpine
     restart: always
-    container_name: source-db
+    container_name: oltp-db
     ports:
       - 54320:54320
     environment:
@@ -39,10 +39,10 @@ services:
       - POSTGRES_PASSWORD=${SOURCE_PASSWORD}
       - POSTGRES_DB=${SOURCE_DB}
 
-  dest-db:
+  olap-db:
     image: postgres:11.4-alpine
     restart: always
-    container_name: dest-db
+    container_name: olap-db
     ports:
       - 54321:54321
     environment:

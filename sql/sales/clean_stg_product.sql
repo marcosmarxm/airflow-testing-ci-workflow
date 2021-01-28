@@ -1,1 +1,0 @@
-select max(date) from {{params.table_name}} limit 1

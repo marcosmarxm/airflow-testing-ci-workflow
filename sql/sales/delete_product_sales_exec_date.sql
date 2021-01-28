@@ -1,1 +1,0 @@
-delete from product_sales where purchaseDate = %(date)s

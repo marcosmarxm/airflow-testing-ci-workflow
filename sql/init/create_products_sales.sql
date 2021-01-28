@@ -5,5 +5,7 @@ CREATE TABLE IF NOT EXISTS {tablename} (
     productId       INTEGER,
     unitPrice       REAL,
     quantity        INTEGER,
-    totalRevenue    REAL
+    totalRevenue    REAL,
+    productName     TEXT,
+    productCategory TEXT
 )

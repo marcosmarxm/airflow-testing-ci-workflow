@@ -1,3 +1,6 @@
-productId,productName,productCategory,price
-111,'tenis nike','tenis',350.5
-112,'tenis adidas','tenis',200.8
+productId,productName,productCategory
+220,camiseta nike,camiseta
+222,tenis adidas,tenis
+225,camiseta adidas,camiseta
+227,new tenis nike,tenis
+228,bermuda adidas,bermuda
