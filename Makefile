@@ -11,4 +11,4 @@ down:
 	docker-compose down
 
 testing:
-	docker exec airflow pytest -vv
+	docker exec airflow pytest -v

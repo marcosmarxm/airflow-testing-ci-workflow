@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS {tablename} (
-    productId       INTEGER,
-    productName     TEXT,
-    productCategory TEXT
+    product_id       INTEGER,
+    product_name     TEXT,
+    product_category TEXT
 );  

@@ -13,7 +13,7 @@ services:
       container_name: airflow
       volumes:
         - ./dags:/opt/airflow/dags
-        - ./sql:/opt/airflow/dags/sql
+        - ./sql:/opt/airflow/sql
         - ./tests:/opt/airflow/tests
         - ./data:/opt/airflow/data
         - ./requirements.txt:/opt/airflow/requirements.txt

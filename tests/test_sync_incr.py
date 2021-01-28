@@ -1,5 +1,6 @@
 import os
 import subprocess
+import logging
 import pandas as pd
 from unittest import TestCase
 from pandas._testing import assert_frame_equal
@@ -18,12 +19,12 @@ def insert_initial_data(tablename, hook):
 
 def create_table(tablename, hook):
     filename = tablename.replace('stg_', '')
-    sql_stmt = open(f'/opt/airflow/dags/sql/init/create_{filename}.sql').read()
+    sql_stmt = open(f'/opt/airflow/sql/init/create_{filename}.sql').read()
     hook.run(sql_stmt.format(tablename=tablename))
 
 
-def get_csv_sample_as_df(filename):
-    return pd.read_csv(f'{AIRFLOW_HOME}/data/{filename}.csv')
+def output_expected_as_df(filename):
+    return pd.read_csv(f'{AIRFLOW_HOME}/data/expected/{filename}.csv')
 
 
 def execute_dag(dag_id, execution_date):
@@ -36,13 +37,11 @@ class TestDataTransfer(TestCase):
     def setUp(self):
         self.oltp_hook = PostgresHook('oltp')
         self.olap_hook = PostgresHook('olap')
-        self.default_date = '2020-01-01'
-        self.transaction_table = 'transactions'
-        self.product_table = 'products'
-        self.product_sales_table = 'product_sales'
 
     def test_compare_transactions_source_dest_must_be_equal(self):
         """ Check if data from source is transfer to dest db after run DAG """
+        date = '2020-01-01'
+
         create_table('transactions', self.oltp_hook)
         insert_initial_data('transactions', self.oltp_hook)
 
@@ -53,10 +52,14 @@ class TestDataTransfer(TestCase):
         create_table('stg_products', self.olap_hook)
         create_table('products_sales', self.olap_hook)
 
-        execute_dag('products_sales_pipeline', self.default_date)
+        execute_dag('products_sales_pipeline', date)
 
-        result = self.olap_hook.get_pandas_df(f'select * from {self.transaction_table}')
-        expected = get_csv_sample_as_df(self.transaction_table)
+        stg_transaction_result = self.olap_hook.get_pandas_df('select * from stg_transactions')
+        stg_transaction_expected = output_expected_as_df(f'stg_transactions_{date}')
+        assert_frame_equal(stg_transaction_result, stg_transaction_expected)
+        assert len(stg_transaction_result) == 3
 
-        assert_frame_equal(result, expected)
-        assert len(result) == 6
+        stg_products_result = self.olap_hook.get_pandas_df('select * from stg_products')
+        stg_products_expected = output_expected_as_df(f'stg_products')
+        assert_frame_equal(stg_products_result, stg_products_expected)
+        assert len(stg_products_result) == 5
