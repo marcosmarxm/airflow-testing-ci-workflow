@@ -14,23 +14,12 @@ def products_sales_pipeline():
     execution_date = '{{ ds }}'
 
     @task()
-    def transfer_transactions_data(date: str):
-        """Get records from transaction table for a specific date"""
+    def transfer_oltp_olap(dest_table, sql, params=None):
+        """Get records from OLTP and transfer to OLAP database"""
         oltp_hook = PostgresHook(postgres_conn_id='oltp')
         olap_hook = PostgresHook(postgres_conn_id='olap')
-        data_extracted = oltp_hook.get_records(
-            sql='select * from transactions where "purchase_date" = %s',
-            parameters=[date]
-        )
-        olap_hook.insert_rows('stg_transactions', data_extracted, commit_every=1000)
-
-    @task()
-    def transfer_products_data():
-        """Build entire product table everyday"""
-        oltp_hook = PostgresHook(postgres_conn_id='oltp')
-        olap_hook = PostgresHook(postgres_conn_id='olap')
-        data_extracted = oltp_hook.get_records('select * from products')
-        olap_hook.insert_rows('stg_products', data_extracted, commit_every=1000)
+        data_extracted = oltp_hook.get_records(sql=sql, parameters=params)
+        olap_hook.insert_rows(dest_table, data_extracted, commit_every=1000)
 
     delete_products_sales_exec_date = PostgresOperator(
         task_id='delete_products_sales_exec_date',
@@ -56,18 +45,19 @@ def products_sales_pipeline():
         sql='agg_sales_category.sql'
     )
 
-    # clean_staging = PostgresOperator(
-    #     task_id='clean_staging',
-    #     postgres_conn_id='olap',
-    #     sql='clean_staging_tables.sql'
-    # )
 
-    load_incremental_transactions_data = transfer_transactions_data(execution_date)
-    load_full_products_data = transfer_products_data()
+    load_incremental_transactions_data = transfer_oltp_olap(
+        dest_table='stg_transactions',
+        sql='select * from transactions where "purchase_date" = %s',
+        params=[execution_date]
+    )
+    load_full_products_data = transfer_oltp_olap(
+        dest_table='stg_products',
+        sql='select * from products'
+    )
     [load_full_products_data, load_incremental_transactions_data, delete_products_sales_exec_date] >> join_transactions_products
     join_transactions_products >> union_incremental_products_sales
     union_incremental_products_sales >> agg_sales_category
-    # union_incremental_products_sales >> clean_staging
 
 
 dag_prod_sales_pipeline = products_sales_pipeline()
