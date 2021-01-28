@@ -16,16 +16,12 @@ def products_sales_pipeline():
     @task()
     def transfer_transactions_data(date: str):
         """Get records from transaction table for a specific date"""
-        print(f'The exec date called is: {date}')
-        execution_date = '{{ ds }}'
-        print(f'taking from... {execution_date}')
         oltp_hook = PostgresHook(postgres_conn_id='oltp')
         olap_hook = PostgresHook(postgres_conn_id='olap')
         data_extracted = oltp_hook.get_records(
             sql='select * from transactions where "purchase_date" = %s',
             parameters=[date]
         )
-        print(data_extracted)
         olap_hook.insert_rows('stg_transactions', data_extracted, commit_every=1000)
 
     @task()

@@ -1,5 +1,5 @@
 # 
-name: CI
+name: MondayBuilding
 
 on:
   schedule:
