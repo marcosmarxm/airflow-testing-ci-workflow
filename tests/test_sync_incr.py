@@ -1,6 +1,5 @@
 import os
 import subprocess
-import logging
 import pandas as pd
 from unittest import TestCase
 from pandas._testing import assert_frame_equal
