@@ -4,8 +4,6 @@ name: CI
 on:
   schedule:
     - cron: "0 10 * * 1"
-  branches:
-    - main
 
 jobs:
   build:
