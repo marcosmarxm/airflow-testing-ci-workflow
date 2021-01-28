@@ -1,6 +1,6 @@
 # Airflow Testing with CI workflow
 
-This code is complementar to my article [How to build a DataOps enviroment with Airflow (Part 1): setup CI/CD and DAG pipeline tests](https://medium.com/@marcosmarxm/how-to-build-a-dataops-enviroment-with-airflow-part-1-setup-ci-cd-and-dag-pipeline-tests-13cdf050439e).
+This code is complementar to my article [How to develop data pipeline in Airflow through TDD (test-driven development)](https://medium.com/@marcosmarxm/how-to-build-a-dataops-enviroment-with-airflow-part-1-setup-ci-cd-and-dag-pipeline-tests-13cdf050439e).
 I suggest you to read to better understand the code and the way I think how to setup the project.
 
 ## The project
@@ -11,9 +11,8 @@ Below is a summary of what will be accomplished in this project. We simulate the
 To assist in the development we use a local development environment and also CI integration with Github Action. Below is the sequence of execution of the stages of operations in the project.
 
 ![Containers](./assets/images/localenvsetup.png)
-- **Airflow**: container running local setup for dev;
-- **source-db** and **dest-db**: container that simulate banks in a production environment and receive fake data;
-- **handler**: python image that has scripts for initial data loading and also serves as a "controlled environment" for testing.
+- **Airflow**: container running local setup for development;
+- **oltp-db** and **olap-db**: container that simulate database in a production environment and receive fake data;
 
 ### Dependencies?
 Docker, docker-compose and makefile.
@@ -24,16 +23,11 @@ The command below will raise the environment using docker-compose. Wait a few mi
 ```
 make setup
 ```
-By running the above command it is possible to access Airflow at `localhost: 8080`. A user of test user: admin / password: admin is created. At this stage you can develop your DAGs and test them as you modify them.
-
-The command below executes a call for Airflow to run the DAGs that have already been created and have tests. If you develop a new DAG you must insert it here when you run the tests and CI it is invoked.
+By running the above command it is possible to access Airflow at `localhost: 8080`. 
+A user of test user: admin / password: admin is created. At this stage you can develop your DAGs and test them as you modify them.
+And finally, the command that calls the `pytest` to perform tests
 ```
-make run
-```
-
-And finally, the command that calls the container handler to run the tests.
-```
-make tests
+make testing
 ```
 ---
 
