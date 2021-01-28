@@ -1,4 +1,5 @@
 # Airflow Testing with CI workflow
+![CI](https://github.com/marcosmarxm/airflow-testing-ci-workflow/workflows/CI/badge.svg?branch=master)
 
 This code is complementar to my article [How to develop data pipeline in Airflow through TDD (test-driven development)](https://medium.com/@marcosmarxm/how-to-build-a-dataops-enviroment-with-airflow-part-1-setup-ci-cd-and-dag-pipeline-tests-13cdf050439e).
 I suggest you to read to better understand the code and the way I think how to setup the project.
