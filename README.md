@@ -1,35 +1,39 @@
 # Airflow Testing with CI workflow
 ![CI](https://github.com/marcosmarxm/airflow-testing-ci-workflow/workflows/CI/badge.svg?branch=master)
 
-This code is complementar to my article [How to develop data pipeline in Airflow through TDD (test-driven development)](https://medium.com/@marcosmarxm/how-to-build-a-dataops-enviroment-with-airflow-part-1-setup-ci-cd-and-dag-pipeline-tests-13cdf050439e).
+This code is complementar to the article [How to develop data pipeline in Airflow through TDD (test-driven development)](https://medium.com/@marcosmarxm/how-to-build-a-dataops-enviroment-with-airflow-part-1-setup-ci-cd-and-dag-pipeline-tests-13cdf050439e).
 I suggest you to read to better understand the code and the way I think how to setup the project.
 
 ## The project
 
-Below is a summary of what will be accomplished in this project. We simulate the transfer of fictitious transaction data from an ecommerce from the `source-db` database to the `dest-db` database.
-![Macro Worflow of the Project](./assets/images/macroflow.png)
+Below is a summary of what will be accomplished in this project. We'll simulate the transfer of some fake transaction data from an ecommerce. A simple task transfering data from the `otlp-db` database to the `olap-db` database.
 
-To assist in the development we use a local development environment and also CI integration with Github Action. Below is the sequence of execution of the stages of operations in the project.
+![Diagram](./assets/images/diagram.png)
 
-![Containers](./assets/images/localenvsetup.png)
-- **Airflow**: container running local setup for development;
+To help in the development we use a local development environment to build the pipeline with tests and also a Continuous Integration pipeline with Github Action to ensure that tests are applied at each change.
+
+**Containers**
+- **airflow**: container running local setup for development;
 - **oltp-db** and **olap-db**: container that simulate database in a production environment and receive fake data;
+
+In this tutorial we won't developt the dashboard part only the pipeline.
 
 ### Dependencies?
 Docker, docker-compose and makefile.
 
 ### How to run?
 
-The command below will raise the environment using docker-compose. Wait a few minutes (240s, yeah omg right?) For correct Airflow configuration then create the necessary credentials and connections. Finally, insert the initial data into the mock banks.
-```
+The command below will setup the environment using docker-compose. Wait a few minutes (240s, yeah omg right?) to Airflow initialize its internal configuration, then the command will create credentials and connections.
+```bash
 make setup
 ```
 By running the above command it is possible to access Airflow at `localhost: 8080`. 
 A user of test user: admin / password: admin is created. At this stage you can develop your DAGs and test them as you modify them.
-And finally, the command that calls the `pytest` to perform tests
-```
+And finally, the command that calls the `pytest` to perform tests.
+```bash
 make testing
 ```
+![Containers](./assets/images/workflow_with_tests.png)
 ---
 
 Some resources about Airflow testing and DataOps:
