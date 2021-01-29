@@ -59,6 +59,16 @@ class TestDataTransfer(TestCase):
         assert len(stg_transaction_result) == 3
 
         stg_products_result = self.olap_hook.get_pandas_df('select * from stg_products')
-        stg_products_expected = output_expected_as_df(f'stg_products')
+        stg_products_expected = output_expected_as_df('stg_products')
         assert_frame_equal(stg_products_result, stg_products_expected)
         assert len(stg_products_result) == 5
+
+        product_sales_result = self.olap_hook.get_pandas_df('select * from products_sales')
+        product_sales_expected = output_expected_as_df('products_sales')
+        assert_frame_equal(product_sales_result, product_sales_expected)
+        assert len(product_sales_result) == 3
+
+        agg_result = self.olap_hook.get_pandas_df('select * from agg_sales_category')
+        agg_expected = output_expected_as_df('agg_sales_category')
+        assert_frame_equal(agg_result, agg_expected)
+        assert len(agg_result) == 3
