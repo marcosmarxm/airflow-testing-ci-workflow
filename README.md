@@ -1,4 +1,4 @@
-# Airflow Testing with CI workflow
+# Airflow DAG development with tests + CI workflow
 ![CI](https://github.com/marcosmarxm/airflow-testing-ci-workflow/workflows/CI/badge.svg?branch=master)
 ![MondayBuilding](https://github.com/marcosmarxm/airflow-testing-ci-workflow/workflows/MondayBuilding/badge.svg)
 
