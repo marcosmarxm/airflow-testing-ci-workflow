@@ -16,8 +16,8 @@ def transfer_oltp_olap(**kwargs):
     data_extracted = oltp_hook.get_records(sql=sql, parameters=params)
     olap_hook.insert_rows(dest_table, data_extracted, commit_every=1000)
 
-
-with DAG(dag_id='products_sales_pipeline',
+KIIJI
+with DAG(dag_id='another_dag',
          default_args={'owner': 'airflow'},
          schedule_interval=None,
          start_date=days_ago(2),

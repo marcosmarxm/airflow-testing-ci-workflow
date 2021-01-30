@@ -17,7 +17,6 @@ def insert_initial_data(tablename, hook):
 
 
 def create_table(tablename, hook):
-    filename = tablename.replace('stg_', '')
     sql_stmt = open(f'/opt/airflow/sql/init/create_{filename}.sql').read()
     hook.run(sql_stmt.format(tablename=tablename))
 
@@ -31,13 +30,13 @@ def execute_dag(dag_id, execution_date):
     subprocess.run(["airflow", "dags", "backfill", "-s", execution_date, dag_id])
 
 
-class TestDataTransfer(TestCase):
+class TestSalesPipeline(TestCase):
 
     def setUp(self):
         self.oltp_hook = PostgresHook('oltp')
         self.olap_hook = PostgresHook('olap')
 
-    def test_compare_transactions_source_dest_must_be_equal(self):
+    def test_validate_sales_pipeline(self):
         """ Check if data from source is transfer to dest db after run DAG """
         date = '2020-01-01'
 
