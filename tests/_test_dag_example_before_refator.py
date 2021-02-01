@@ -1,11 +1,7 @@
 import subprocess
 import pandas as pd
+from pandas._testing import assert_frame_equal
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-
-
-def execute_dag(dag_id, execution_date):
-    """Execute a DAG in a specific date this process wait for DAG run or fail to continue"""
-    subprocess.run(["airflow", "dags", "backfill", "-s", execution_date, dag_id])
 
 
 class TestSalesPipeline:
@@ -34,7 +30,10 @@ class TestSalesPipeline:
         date = '2020-01-01'
         execute_dag('products_sales_pipeline', date)
 
-        olap_product_data = olap_hook.get_records(
+        olap_product_size = olap_hook.get_records(
             'select * from products'
         )
-        assert len(olap_product_data) == 5
+        assert len(olap_product_size) == 5
+
+        olap_product_data = olap_hook.get_pandas_df('select * from products')
+        assert_frame_equal(olap_product_data, sample_data)

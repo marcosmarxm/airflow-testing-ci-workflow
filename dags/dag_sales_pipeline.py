@@ -16,7 +16,7 @@ def transfer_oltp_olap(**kwargs):
     data_extracted = oltp_hook.get_records(sql=sql, parameters=params)
     olap_hook.insert_rows(dest_table, data_extracted, commit_every=1000)
 
-KIIJI
+
 with DAG(dag_id='another_dag',
          default_args={'owner': 'airflow'},
          schedule_interval=None,
@@ -25,6 +25,12 @@ with DAG(dag_id='another_dag',
          tags=['etl', 'analytics', 'sales']) as dag:
 
     execution_date = '{{ ds }}'
+
+    clean_stg_tables = PostgresOperator(
+        task_id='clean_staging',
+        postgres_conn_id='olap',
+        sql='clean_stating_tables'
+    )
 
     load_incremental_transactions_data = PythonOperator(
         task_id='load_incremental_transactions',
@@ -67,6 +73,6 @@ with DAG(dag_id='another_dag',
         sql='agg_sales_category.sql'
     )
 
-    [load_full_products_data, load_incremental_transactions_data, delete_products_sales_exec_date] >> join_transactions_products
-    join_transactions_products >> union_incremental_products_sales
+    clean_stg_tables >> [load_full_products_data, load_incremental_transactions_data] >> join_transactions_products
+    [delete_products_sales_exec_date, join_transactions_products] >> union_incremental_products_sales
     union_incremental_products_sales >> agg_sales_category

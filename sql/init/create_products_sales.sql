@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS {tablename} (
+CREATE TABLE IF NOT EXISTS products_sales (
     transaction_id   INTEGER,
     purchase_date    TEXT,
     user_id          INTEGER,

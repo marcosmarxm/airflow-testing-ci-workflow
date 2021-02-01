@@ -30,3 +30,11 @@ with DAG(dag_id='products_sales_pipeline',
             'dest_table': 'products',
             'sql': 'select * from products',
         })
+
+    load_incremental_transactions_data = PythonOperator(
+        task_id='load_incremental_transactions',
+        python_callable=transfer_oltp_olap,
+        op_kwargs={
+            'dest_table': 'transactions',
+            'sql': 'select * from transactions where "purchase_date" = cast({{ ds }} as text)',
+        })
