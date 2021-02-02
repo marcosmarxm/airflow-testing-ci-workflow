@@ -37,26 +37,26 @@ class TestDataTransfer(TestCase):
         self.oltp_hook = PostgresHook('oltp')
         self.olap_hook = PostgresHook('olap')
 
-    def test_compare_transactions_source_dest_must_be_equal(self):
-        """ Check if data from source is transfer to dest db after run DAG """
+    def test_validate_sales_pipeline(self):
+        """Validate if Sales Pipeline DAG run correctly"""
         date = '2020-01-01'
 
-        create_table('transactions', self.oltp_hook)
-        insert_initial_data('transactions', self.oltp_hook)
+        create_table('purchases', self.oltp_hook)
+        insert_initial_data('purchases', self.oltp_hook)
 
         create_table('products', self.oltp_hook)
         insert_initial_data('products', self.oltp_hook)
 
-        create_table('stg_transactions', self.olap_hook)
+        create_table('stg_purchases', self.olap_hook)
         create_table('stg_products', self.olap_hook)
         create_table('products_sales', self.olap_hook)
 
         execute_dag('products_sales_pipeline', date)
 
-        stg_transaction_result = self.olap_hook.get_pandas_df('select * from stg_transactions')
-        stg_transaction_expected = output_expected_as_df(f'stg_transactions_{date}')
-        assert_frame_equal(stg_transaction_result, stg_transaction_expected)
-        assert len(stg_transaction_result) == 3
+        stg_purchases_result = self.olap_hook.get_pandas_df('select * from stg_purchases')
+        stg_purchases_expected = output_expected_as_df(f'stg_purchases_{date}')
+        assert_frame_equal(stg_purchases_result, stg_purchases_expected)
+        assert len(stg_purchases_result) == 3
 
         stg_products_result = self.olap_hook.get_pandas_df('select * from stg_products')
         stg_products_expected = output_expected_as_df('stg_products')
@@ -71,4 +71,4 @@ class TestDataTransfer(TestCase):
         agg_result = self.olap_hook.get_pandas_df('select * from agg_sales_category')
         agg_expected = output_expected_as_df('agg_sales_category')
         assert_frame_equal(agg_result, agg_expected)
-        assert len(agg_result) == 3
+        assert len(agg_result) == 2
