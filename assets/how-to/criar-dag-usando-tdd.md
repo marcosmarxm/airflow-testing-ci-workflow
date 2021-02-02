@@ -37,7 +37,7 @@ Iremos pensar em como construir ele agora.
 Também já vimos o formato dos dados e uma pequena amostra deles.
 Com isso temos o insumo para realizarmos o inicio do desenvolvimento do projeto.
 
-## Full load product data
+## TASK: Full load product data
 A primeira tarefa que iremos desenvolver é a `full_load_product_data`. 
 Ela tem o objetivo de pegar os dados da tabela `products` do banco de dados `oltp-db` e transferir para o `olap-db`.
 Primero vamos criar nossos dados fake para nos guiar.
@@ -485,11 +485,13 @@ Está bem mais legível separado em funções.
 Tome um tempo e estude a mudança que ocorreram. 
 Para quem está começando entender e desbravar esse processo de refatoração irá ajudar muito. (Se tiver uma duvida cruel pode me enviar uma mensagem)
 
-## Load incremental transactions
+## TASK: Load incremental transactions
 Vamos começar a proxima tarefa! 
 A unica diferença dela para anterior é que teremos uma condição na carga dos dados.
 Devemos apenas carregar os dados do dia de execução, `execution_date`.
-Primeiro vamos criar nosso arquivo com dados fake. Você pode pegar os dados clicando [aqui](https://raw.githubusercontent.com/marcosmarxm/airflow-testing-ci-workflow/master/data/products.csv)
+Primeiro vamos criar nosso arquivo com dados fake.
+Crie o arquivo `products.csv` dentro do diretório `/data`.
+Você pode pegar os dados clicando [aqui](https://raw.githubusercontent.com/marcosmarxm/airflow-testing-ci-workflow/master/data/products.csv)
 |transaction_id|purchase_date|user_id|product_id|unit_price|quantity|total_revenue|
 |--------------|-------------|-------|----------|----------|--------|-------------|
 |1             |2020-01-01   |111    |222       |150.0     |2       |300.0        |
@@ -529,10 +531,205 @@ class TestSalesPipeline:
 
         # New code!
         # Test load_incremental_transactions
-        olap_transactions_size = olap_hook.get_record('select * from transactions')
+        olap_transactions_size = olap_hook.get_records('select * from transactions')
         assert len(olap_transactions_size) == 3
 ```
-Explicando porque iremos comparar o tamanho da transactions por 3. 
 A coluna dos dados que correspondem ao tempo se chama `purchase_date`.
 Então se analisarmos os dados de amostra temos apenas 3 entradas para data `2020-01-01`.
 Essa data já estamos utilizando quando chamamos nossa DAG, variavel `date = '2020-01-01`.
+
+Vou antecipar alguns passos que já fizemos com a DAG anterior. Vou criar a tabela transaction nos dois bancos de dados e popular o banco de dados `oltp-db` com os dados fake que criamos. Foi incluido as linhas abaixo:
+```python
+# test_sales_pipeline
+class TestSalesPipeline:
+
+    def test_validate_sales_pipeline(self):
+        oltp_hook = PostgresHook('oltp')
+        olap_hook = PostgresHook('olap')
+
+        create_table('products', oltp_hook)
+        create_table('products', olap_hook)
+        insert_initial_data('products', oltp_hook)
+
+        create_table('transactions', oltp_hook)
+        create_table('transactions', olap_hook)
+        insert_initial_data('transactions', oltp_hook)
+```
+
+Vamos adicionar a nova task a DAG.
+```python
+from airflow import DAG
+from airflow.utils.dates import days_ago
+from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.operators.python import PythonOperator
+
+
+def transfer_oltp_olap(**kwargs):
+    """Get records from OLTP and transfer to OLAP database"""
+    dest_table = kwargs.get('dest_table')
+    sql = kwargs.get('sql')
+    params = kwargs.get('params')
+
+    oltp_hook = PostgresHook(postgres_conn_id='oltp')
+    olap_hook = PostgresHook(postgres_conn_id='olap')
+
+    data_extracted = oltp_hook.get_records(sql=sql, parameters=params)
+    olap_hook.insert_rows(dest_table, data_extracted, commit_every=1000)
+
+
+with DAG(dag_id='products_sales_pipeline',
+         default_args={'owner': 'airflow'},
+         schedule_interval=None,
+         start_date=days_ago(2)) as dag:
+
+    execution_date = '{{ ds }}'
+
+    load_full_products_data = PythonOperator(
+        task_id='load_full_products',
+        python_callable=transfer_oltp_olap,
+        op_kwargs={
+            'dest_table': 'products',
+            'sql': 'select * from products',
+        })
+
+    load_incremental_transactions_data = PythonOperator(
+        task_id='load_incremental_transactions',
+        python_callable=transfer_oltp_olap,
+        op_kwargs={
+            'dest_table': 'transactions',
+            'sql': 'select * from transactions where "purchase_date" = %s',
+            'params': ['{{ ds}}']
+        })
+```
+Foi criado uma nova task PythonOperator chamada `load_incremental_transactions_data`.Ela reutiliza a função criada anteriormente.
+A unica diferença é a clausula `where purchase_data = %s`.
+E a edição da função para receber o parametro extra na consulta.
+A sintaxe `{{ ds }}` é uma convenção do Airflow para acessar variaveis de contexto. 
+Existem diversas variaveis que podem ser acessadas dentro do contexto da DAG. 
+É meio obscuro no inicio, para mais informações leia a documentação [Macros Reference](https://airflow.apache.org/docs/apache-airflow/stable/macros-ref.html).
+
+Podemos rodar nossos testes agora.
+Nossa segunda task está concluida.
+Novamente podemos incrementar nosso teste para atender melhor o projeto.
+
+Nesse caso, vamos criar o arquivo com os dados esperados.
+Ao invés de copiar o arquivo `transaction.csv` como aconteceu com os dados de produtos, agora iremos apenas precisar de um subconjunto pertinente aos testes.
+Crie um novo arquivo chamado `transactions_2020-01-01.csv` dentro da pasta `expected`.
+|transaction_id|purchase_date|user_id|product_id|unit_price|quantity|total_revenue|
+|--------------|-------------|-------|----------|----------|--------|-------------|
+|1             |2020-01-01   |111    |222       |150.0     |2       |300.0        |
+|2             |2020-01-01   |101    |225       |75        |1       |75           |
+|3             |2020-01-01   |153    |228       |300       |1       |300          |
+Ele terá apenas dados do dia 2020-01-01.
+Agora vamos editar a nossa função de teste.
+```python
+#test_sales_pipeline.py
+
+# old
+olap_transactions_size = olap_hook.get_records('select * from transactions')
+assert len(olap_transactions_size) == 3
+
+# new
+transaction_data = self.olap_hook.get_pandas_df('select * from transactions')
+transaction_size = len(transaction_data)
+transaction_expected = output_expected_as_df(f'transactions_{date}')
+assert_frame_equal(transaction_data, transaction_expected)
+assert transaction_size == 3
+```
+Assim concluimos a segunda tarefa.
+Chegamos no estagio do projeto que finalizamos as tarefas de extração e carga dos dados. 
+As proximas tarefas irão envolver apenas o banco `olap-db`.
+Agora vamos utilizar outro recurso do Airflow para executar ações.
+
+### TASK: join_transactions_products
+Objetivo dessa task é realizar o join das duas tabelas criadas anteriormente.
+Voltamos ao nosso arquivo de teste criando o novo teste para a tabela `join_transactions_products`.
+```python
+# test_sales_pipiline.py
+# ...
+transaction_data = self.olap_hook.get_pandas_df('select * from transactions')
+transaction_size = len(transaction_data)
+transaction_expected = output_expected_as_df(f'transactions_{date}')
+assert_frame_equal(transaction_data, transaction_expected)
+assert transaction_size == 3
+
+# Test join_transactions_products
+transactions_products_size = self.olap_hook.get_pandas_df('select * from join_transactions_products')
+assert len(transactions_products_size) == 3
+```
+Explicando o motivo de esperar que o resultado seja 3.
+Nesse join iremos pegar as transações carregadas e fazer um `left` join com a tabela de produtos. Por isso o tamanho maximo será 3.
+
+Podemos editar a DAG após inserir o teste.
+```python
+from airflow import DAG
+from airflow.utils.dates import days_ago
+from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.providers.postgres.operators.postgres import PostgresOperator
+from airflow.operators.python import PythonOperator
+
+
+def transfer_oltp_olap(**kwargs):
+    # não foi alterado nesse momento
+
+
+with DAG(dag_id='products_sales_pipeline',
+         default_args={'owner': 'airflow'},
+         schedule_interval=None,
+         template_searchpath='/opt/airflow/sql/sales/',
+         start_date=days_ago(2)) as dag:
+
+    load_full_products_data = PythonOperator(
+        task_id='load_full_products',
+        python_callable=transfer_oltp_olap,
+        op_kwargs={
+            'dest_table': 'products',
+            'sql': 'select * from products',
+        })
+
+    load_incremental_transactions_data = PythonOperator(
+        task_id='load_incremental_transactions',
+        python_callable=transfer_oltp_olap,
+        op_kwargs={
+            'dest_table': 'transactions',
+            'sql': 'select * from transactions where "purchase_date" = %s',
+            'params': ['{{ ds }}']
+        })
+
+    join_transactions_products = PostgresOperator(
+        task_id='join_transactions_products',
+        postgres_conn_id='olap',
+        sql='join_transactions_products.sql'
+    )
+
+    [load_full_products_data, load_incremental_transactions_data] >> join_transactions_products 
+```
+1. `template_searchpath='/opt/airflow/sql/sales/',` que foi inserido na criação da DAG(...) as dag. Esse comando permite carregar scripts SQL de outra pasta.
+2. **PostgresOperator** como agora iremos transformar os dados que estão no banco de dados `olap-db` podemos utilizar o Operator.
+3. Por ultimo foi realizado a conexão de dependencia das tarefas.
+
+Precisamos criar nosso arquivo SQL com a query.
+Crie ele no diretório `/sql/sales/join_transactions_products.sql`.
+Porque a pasta `init` e `sales`? Eu gosto de deixar os arquivos separados por esses segmentos logicos onde eles são utilizados.
+```sql
+create table if not exists join_transactions_products as (
+    select 
+        t.*,
+        p.product_name,
+        p.product_category 
+    from transactions t
+    left join products p 
+        on p.product_id = t.product_id 
+)
+```
+Após criar o arquivo SQL podemos executar os testes e teremos nossa terceira tarefa concluida!
+As proximas tarefas podem ser realizadas da mesma forma utilizando o PostgresOperator.
+Vou deixar elas como desafio.
+Caso tenha dificuldade você pode analisar o código que está no repositorio para se guiar.
+
+**Pontos de atenção**:<br>
+- criar tabelas com nome stg;
+- garantir que os testes sejam idempotente também e sempre tenham o mesmo resultado (rodar duas vezes...)
+
+
+Muito obrigado e caso tenha alguma sugestão me envie uma mensagem.

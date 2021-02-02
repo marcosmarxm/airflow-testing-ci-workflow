@@ -33,7 +33,7 @@ def execute_dag(dag_id, execution_date):
 def execute_task(dag_id, task_id, execution_date):
     subprocess.run(['airflow', 'tasks', 'test', dag_id, task_id, execution_date])
 
-'''
+
 class TestSalesPipeline(TestCase):
 
     def setUp(self):
@@ -75,52 +75,3 @@ class TestSalesPipeline(TestCase):
         agg_expected = output_expected_as_df('agg_sales_category')
         assert_frame_equal(agg_result, agg_expected)
         assert len(agg_result) == 3
-
-'''
-class TestSalesPipelineUsingTask(TestCase):
-
-    def setUp(self):
-        self.oltp_hook = PostgresHook('oltp')
-        self.olap_hook = PostgresHook('olap')
-        self.dag_id = 'another_dag'
-        self.date = '2020-01-01'
-
-        create_table('transactions', self.oltp_hook)
-        insert_initial_data('transactions', self.oltp_hook)
-
-        create_table('products', self.oltp_hook)
-        insert_initial_data('products', self.oltp_hook)
-
-        create_table('stg_transactions', self.olap_hook)
-        create_table('stg_products', self.olap_hook)
-        create_table('products_sales', self.olap_hook)
-
-
-    def test_task_load_products(self):
-        """ Check if data from source is transfer to dest db after run DAG """
-        
-        insert_initial_data('products', self.oltp_hook)
-        self.olap_hook.run('delete from stg_products')
-        execute_task(self.dag_id, 'load_full_products', self.date)
-        stg_products_result = self.olap_hook.get_pandas_df('select * from stg_products')
-        stg_products_expected = output_expected_as_df('products')
-        assert_frame_equal(stg_products_result, stg_products_expected)
-        assert len(stg_products_result) == 5
-'''
-        stg_transaction_result = self.olap_hook.get_pandas_df('select * from stg_transactions')
-        stg_transaction_expected = output_expected_as_df(f'stg_transactions_{date}')
-        assert_frame_equal(stg_transaction_result, stg_transaction_expected)
-        assert len(stg_transaction_result) == 3
-
-
-
-        product_sales_result = self.olap_hook.get_pandas_df('select * from products_sales')
-        product_sales_expected = output_expected_as_df('products_sales')
-        assert_frame_equal(product_sales_result, product_sales_expected)
-        assert len(product_sales_result) == 3
-
-        agg_result = self.olap_hook.get_pandas_df('select * from agg_sales_category')
-        agg_expected = output_expected_as_df('agg_sales_category')
-        assert_frame_equal(agg_result, agg_expected)
-        assert len(agg_result) == 3
-'''
