@@ -1,4 +1,4 @@
-transaction_id,purchase_date,user_id,product_id,unit_price,quantity,total_revenue,product_name,product_category
-1,2020-01-01,111,222,150.0,2,300.0,tenis adidas,tenis
-2,2020-01-01,101,225,75.0,1,75.0,camiseta adidas,camiseta
-3,2020-01-01,153,228,300.0,1,300.0,bermuda adidas,bermuda
+purchase_id,purchase_date,user_id,product_id,unit_price,quantity,total_revenue,product_name,product_category
+1,2020-01-01,111,222,150.0,2,300.0,Dri-FIT T-Shirt,T-Shirt
+2,2020-01-01,101,225,75.0,1,75.0,Brand N T-shirt,T-Shirt
+3,2020-01-01,153,228,300.0,1,300.0,Generic Running Shoes,Shoes

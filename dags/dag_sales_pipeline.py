@@ -26,12 +26,12 @@ with DAG(dag_id='products_sales_pipeline',
 
     execution_date = '{{ ds }}'
 
-    load_incremental_transactions_data = PythonOperator(
-        task_id='load_incremental_transactions',
+    load_incremental_purchases_data = PythonOperator(
+        task_id='load_incremental_purchases',
         python_callable=transfer_oltp_olap,
         op_kwargs={
-            'dest_table': 'stg_transactions',
-            'sql': 'select * from transactions where "purchase_date" = %s',
+            'dest_table': 'stg_purchases',
+            'sql': 'select * from purchases where "purchase_date" = %s',
             'params': [execution_date],
         })
 
@@ -49,10 +49,10 @@ with DAG(dag_id='products_sales_pipeline',
         sql='delete_products_sales_exec_date.sql'
     )
 
-    join_transactions_products = PostgresOperator(
-        task_id='join_transactions_products',
+    join_purchases_with_products = PostgresOperator(
+        task_id='join_purchases_products',
         postgres_conn_id='olap',
-        sql='join_transactions_products.sql'
+        sql='join_purchases_with_products.sql'
     )
 
     union_incremental_products_sales = PostgresOperator(
@@ -67,6 +67,6 @@ with DAG(dag_id='products_sales_pipeline',
         sql='agg_sales_category.sql'
     )
 
-    [load_full_products_data, load_incremental_transactions_data, delete_products_sales_exec_date] >> join_transactions_products
-    join_transactions_products >> union_incremental_products_sales
+    [load_full_products_data, load_incremental_purchases_data, delete_products_sales_exec_date] >> join_purchases_with_products
+    join_purchases_with_products >> union_incremental_products_sales
     union_incremental_products_sales >> agg_sales_category
