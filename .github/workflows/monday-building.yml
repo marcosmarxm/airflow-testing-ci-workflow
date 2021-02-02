@@ -1,4 +1,4 @@
-name: MondayBuilding
+name: Monday building
 
 on:
   schedule:
