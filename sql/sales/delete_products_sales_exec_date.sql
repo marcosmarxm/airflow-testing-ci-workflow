@@ -1,1 +1,0 @@
-delete from products_sales where "purchase_date"::text = cast({{ ds }} as text)
