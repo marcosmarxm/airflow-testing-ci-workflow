@@ -5,6 +5,9 @@
 This code is complementar to the article [How to develop data pipeline in Airflow through TDD (test-driven development)](https://medium.com/@marcosmarxm/how-to-build-a-dataops-enviroment-with-airflow-part-1-setup-ci-cd-and-dag-pipeline-tests-13cdf050439e).
 I suggest you to read to better understand the code and the way I think how to setup the project.
 
+[Step-by-step: How to develop a DAG using TDD (english version)](https://github.com/marcosmarxm/airflow-testing-ci-workflow/blob/master/assets/how-to/create-dag-using-tdd.md)<br>
+[Passo-a-passo: Como desenvolver uma DAG usando TDD (portuguese version)](https://github.com/marcosmarxm/airflow-testing-ci-workflow/blob/master/assets/how-to/criar-dag-usando-tdd.md)
+
 ## The project
 
 Below is a summary of what will be accomplished in this project. We'll simulate the transfer of some fake transaction data from an ecommerce. A simple task transfering data from the `otlp-db` database to the `olap-db` database.
