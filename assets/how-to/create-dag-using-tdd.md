@@ -23,7 +23,7 @@ Explaining each task:
 
 ## Let's start!
 First, let's get our development environment up and running.
-If you have doubts about the environment, I recommend reading the article [link](link-to-article). You can see the code in the file `Makefile`.
+If you have doubts about the environment, I recommend reading the article [link](https://blog.magrathealabs.com/how-to-develop-data-pipeline-in-airflow-through-tdd-test-driven-development-c3333439f358). You can see the code in the file `Makefile`.
 ```
 make setup
 ```
