@@ -677,6 +677,8 @@ with DAG(dag_id='products_sales_pipeline',
          template_searchpath='/opt/airflow/sql/sales/',
          start_date=days_ago(2)) as dag:
 
+    execution_date = '{{ ds }}'
+
     load_full_products_data = PythonOperator(
         task_id='load_full_products',
         python_callable=transfer_oltp_olap,
@@ -691,7 +693,7 @@ with DAG(dag_id='products_sales_pipeline',
         op_kwargs={
             'dest_table': 'purchases',
             'sql': 'select * from purchases where "purchase_date" = %s',
-            'params': ['{{ ds }}']
+            'params': [execution_date]
         })
 
     join_purchases_with_products = PostgresOperator(
