@@ -2,7 +2,7 @@
 [![CI](https://github.com/marcosmarxm/airflow-testing-ci-workflow/workflows/CI/badge.svg?branch=master)](https://github.com/marcosmarxm/airflow-testing-ci-workflow/actions?query=workflow%3ACI)
 [![MondayBuilding](https://github.com/marcosmarxm/airflow-testing-ci-workflow/workflows/MondayBuilding/badge.svg)](https://github.com/marcosmarxm/airflow-testing-ci-workflow/actions?query=workflow%3AMondayBuilding)
 
-This code is complementar to the article [How to develop data pipeline in Airflow through TDD (test-driven development)](https://medium.com/@marcosmarxm/how-to-build-a-dataops-enviroment-with-airflow-part-1-setup-ci-cd-and-dag-pipeline-tests-13cdf050439e).
+This code is complementar to the article [How to develop data pipeline in Airflow through TDD (test-driven development)](https://blog.magrathealabs.com/how-to-develop-data-pipeline-in-airflow-through-tdd-test-driven-development-c3333439f358).
 I suggest you to read to better understand the code and the way I think how to setup the project.
 
 [Step-by-step: How to develop a DAG using TDD (english version)](https://github.com/marcosmarxm/airflow-testing-ci-workflow/blob/master/assets/how-to/create-dag-using-tdd.md)<br>
