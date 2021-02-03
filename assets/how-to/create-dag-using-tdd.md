@@ -16,10 +16,10 @@ Recalling the pipeline that we'll develop:
 Explaining each task:
 - **load_full_products**: deletes the old data and loads the `products` table completely every day.
 - **load_incremental_purchases**: due to the size of this table, an incremental load will be performed using the `execution_date` data parameter.
-- **join_purchase_products_as_product_sales_daily **: this intermediary task prepares the raw data (products and purchases) loaded from the `oltp` database to be stored in the` product_sales` results table that will be used by the analytics team.
+- **join_purchase_products_as_product_sales_daily**: this intermediary task prepares the raw data (products and purchases) loaded from the `oltp` database to be stored in the` product_sales` results table that will be used by the analytics team.
 - **delete_products_sales_exec_date**: this task has the function of clearing the data from the `product_sales` result table at the beginning of the pipeline, thus ensuring that there will be no duplicate data (idempotency).
 - **union_staging_to_products_sales**: load the data from the staging `product_sales_daily` to the table with historical data ` product_sales`.
-- ** rebuild_agg_sales_category **: the result of the table above already illustrates a standard consumption format for a data warehouse, this task illustrates a creation of a simplified "data mart".
+- **rebuild_agg_sales_category**: the result of the table above already illustrates a standard consumption format for a data warehouse, this task illustrates a creation of a simplified "data mart".
 
 ## Let's start!
 First, let's get our development environment up and running.
@@ -99,10 +99,10 @@ We imported **PostgresHook** and created the hook for the `olap-db` database.
 This hook has a method that can execute an SQL query and return its values.
 After editing the test file as shown above, we can run `make testing` again.
 We'll receive the error that the `products` table doesn't exist in the` olap-db` database.
-
-**Attention Point** Here comes an important test consideration.
-Our pipeline is responsible for transferring data and not creating these tables.
-So it is part of the test to configure this setup of the tables.
+<br><br>
+> **Attention Point** Here comes an important test consideration.
+> Our pipeline is responsible for transferring data and not creating these tables.
+> So it is part of the test to configure this setup of the tables.
 ```python
 from airflow.providers.postgres.hooks.postgres import PostgresHook
  
@@ -177,7 +177,11 @@ Explaining what was accomplished:
 1. We created the **task** `load_full_products_data` it's a PythonOperator. An **Operator** is a concept in Airflow that can invoke basic/standardized commands. For example **PythonOperator** calls functions in `python` and **PostgresOperator** can execute SQL queries but cannot transfer data from one database to another. For more information, I recommend reading the [documentation] (https://airflow.apache.org/docs/apache-airflow/stable/concepts.html?highlight=hook#operators).
 2. We created the function `transfer_oltp_olap` it basically creates the two hooks to perform the data collection in the` oltp-db` database for `olap-db`. Because we do not use **PostgresOperator** the reason is that the operator can only execute the query at the limit of the bank it is associated with, it does not transfer data. That's why we use hooks. _kwargs_ is an Airflow convention to pass arguments in functions called by **PythonOperator**.
 
-After completing the DAG we can access Airflow `localhost: 8080` *admin/admin* and verify that we have our first DAG there!
+> **Explaining** the `load_full_products_data` functino is using Airflow resources (memoery, cpu) to execute.
+Nothing wrong with that, but in a more realistic scenario you should probably call an external service to carry out this transfer, transformation etc. (Cluster Spark / Hadoop, etc.)
+
+
+After completing the DAG we can access Airflow `localhost:8080` *admin/admin* and verify that we have our first DAG there!
 
 ![Our initial DAG](../images/our_initial_dag.png)
 
@@ -224,7 +228,7 @@ However, now we have our DAG and the `products` table in both databases.
 If we execute the DAG in the Airflow UI it will be successful in execution.
 Now we need to have it run during our test.
 
-Airflow offers several commands through its **cli** (commands execute in the terminal). The command `airflow dags backfill --start_date DAG_ID` allows you to trigger a DAG on a specific date. [Link to doc] (https://airflow.apache.org/docs/apache-airflow/stable/dag-run.html# backfill).
+Airflow offers several commands through its **cli** (commands execute in the terminal). The command `airflow dags backfill --start_date DAG_ID` allows you to trigger a DAG on a specific date. [Link to the documentation](https://airflow.apache.org/docs/apache-airflow/stable/dag-run.html#backfill).
 This command is perfect for our case. <br>
 We can execute this command in the terminal... so we'll take advantage of Python and execute it using the _subprocess_ library.
 ```python
@@ -321,7 +325,7 @@ class TestSalesPipeline:
 ```
 As I mentioned, Airflow hooks have several methods that help in communication and operations with database. In this case we easily create an *SQLAlchemy engine* for _pandas_ to send the data from *csv* to the `products` table in the` oltp-db` database.
 
-Now, a moment of tension ... we execute `make testing` again ... AND OUR **TEST PASSED!**
+Now, a moment of tension... we execute `make testing` again... AND OUR **TEST PASSED!**<br>
 The 1 warning is due to the Airflow hook using the old Postgresql connection format.
 ```
 ======================== 1 passed, 1 warning in 11.06s =========================
@@ -339,7 +343,7 @@ Very well! Finally we have our DAG doing the first task as we expect.
 We now need to develop the next tasks.
 As we already have the alirce built, it'll be faster and simpler to carry out the next tasks.
 
-**Attention point: we created a very simplistic test**. <br>
+> **Attention point: we created a very simplistic test**. <br>
 It would be better to do a comparison that guarantees the result of the DAG is compatible with the data that we really expect.
 In this task, we want the data in the `products` table in the` olap-db` database to be the same as the `/data/products.csv` file. Let's do this now.
 ```python
