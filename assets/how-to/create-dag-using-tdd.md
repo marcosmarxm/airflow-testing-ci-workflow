@@ -85,7 +85,7 @@ As we have already configured the container `olap-db` and the connection of Airf
 We will use **PostgresHook**, if you want to know more about Hooks you can access the Airflow doc [here](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html?highlight=hook#hooks)
 ```python
 from airflow.providers.postgres.hooks.postgres import PostgresHook
- 
+
 class TestSalesPipeline:
 
     def test_validate_sales_pipeline(self):
@@ -105,7 +105,7 @@ We'll receive the error that the `products` table doesn't exist in the` olap-db`
 > So it is part of the test to configure this setup of the tables.
 ```python
 from airflow.providers.postgres.hooks.postgres import PostgresHook
- 
+
 class TestSalesPipeline:
 
     def test_validate_sales_pipeline(self):
@@ -115,12 +115,12 @@ class TestSalesPipeline:
             product_id       INTEGER,
             product_name     TEXT,
             product_category TEXT
-        );  
+        );
         ''')
         olap_product_size = olap_hook.get_records(
             'select * from products'
         )
-        assert len(olap_product_siza) == 5
+        assert len(olap_product_size) == 5
 ```
 The `.run(sql statement)` command performs an SQL query on the database. It is similar to the `.get_records` we saw before, however it's for when we do not want the return data.
 In the example above, it'll create the table `products` with the necessary columns according to our sample data from `/data/products.csv`.
@@ -195,7 +195,7 @@ It is the same situation as the previous one, we need to create this table in ou
 So let's change `test_sales_pipeline.py` again.
 ```python
 from airflow.providers.postgres.hooks.postgres import PostgresHook
- 
+
 class TestSalesPipeline:
 
     def test_validate_sales_pipeline(self):
@@ -205,7 +205,7 @@ class TestSalesPipeline:
             product_id       INTEGER,
             product_name     TEXT,
             product_category TEXT
-        );  
+        );
         ''')
 
         olap_hook = PostgresHook('olap')
@@ -214,7 +214,7 @@ class TestSalesPipeline:
             product_id       INTEGER,
             product_name     TEXT,
             product_category TEXT
-        );  
+        );
         ''')
 
         olap_product_size = olap_hook.get_records(
@@ -248,7 +248,7 @@ class TestSalesPipeline:
             product_id       INTEGER,
             product_name     TEXT,
             product_category TEXT
-        );  
+        );
         ''')
 
         olap_hook = PostgresHook('olap')
@@ -257,7 +257,7 @@ class TestSalesPipeline:
             product_id       INTEGER,
             product_name     TEXT,
             product_category TEXT
-        );  
+        );
         ''')
         date = '2020-01-01'
         execute_dag('products_sales_pipeline', date)
@@ -295,7 +295,7 @@ class TestSalesPipeline:
             product_id       INTEGER,
             product_name     TEXT,
             product_category TEXT
-        );  
+        );
         ''')
 
         oltp_conn = oltp_hook.get_sqlalchemy_engine()
@@ -313,7 +313,7 @@ class TestSalesPipeline:
             product_id       INTEGER,
             product_name     TEXT,
             product_category TEXT
-        );  
+        );
         ''')
         date = '2020-01-01'
         execute_dag('products_sales_pipeline', date)
@@ -367,7 +367,7 @@ class TestSalesPipeline:
             product_id       INTEGER,
             product_name     TEXT,
             product_category TEXT
-        );  
+        );
         ''')
         oltp_conn = oltp_hook.get_sqlalchemy_engine()
         sample_data = pd.read_csv('./data/products.csv')
@@ -379,7 +379,7 @@ class TestSalesPipeline:
             product_id       INTEGER,
             product_name     TEXT,
             product_category TEXT
-        );  
+        );
         ''')
         date = '2020-01-01'
         execute_dag('products_sales_pipeline', date)
@@ -416,7 +416,7 @@ CREATE TABLE IF NOT EXISTS products (
     product_id       INTEGER,
     product_name     TEXT,
     product_category TEXT
-);  
+);
 ```
 Create a `expected` folder within `/data`.
 In this case we will just duplicate the `products.csv` file into it.
@@ -514,7 +514,7 @@ class TestSalesPipeline:
         create_table('products', oltp_hook)
         create_table('products', olap_hook)
         insert_initial_data('products', oltp_hook)
-        
+
         date = '2020-01-01'
         execute_dag('products_sales_pipeline', date)
 
@@ -674,7 +674,7 @@ with DAG(dag_id='products_sales_pipeline',
          schedule_interval=None,
          template_searchpath='/opt/airflow/sql/sales/',
          start_date=days_ago(2)) as dag:
-    
+
     execution_date = '{{ ds }}'
 
     load_full_products_data = PythonOperator(
@@ -700,7 +700,7 @@ with DAG(dag_id='products_sales_pipeline',
         sql='join_purchases_with_products.sql'
     )
 
-    [load_full_products_data, load_incremental_purchases_data] >> join_purchases_with_products 
+    [load_full_products_data, load_incremental_purchases_data] >> join_purchases_with_products
 ```
 1. `template_searchpath='/opt/airflow/sql/sales/'` which was inserted in the instantiation of the DAG. This command allows you to load SQL scripts from another folder.
 2. **PostgresOperator** as we'll now transform the data that is in the `olap-db` database, we can use Operator.
@@ -711,13 +711,13 @@ Create it in the `/sql/sales/join_purchases_with_products.sql` directory.
 Why the `init` and` sales` folder? I like to leave the files separated by these logical segments where they are used.
 ```sql
 create table if not exists join_purchases_products as (
-    select 
+    select
         t.*,
         p.product_name,
-        p.product_category 
+        p.product_category
     from purchases t
-    left join products p 
-        on p.product_id = t.product_id 
+    left join products p
+        on p.product_id = t.product_id
 )
 ```
 After creating the SQL file we can run the tests and we will have our third task completed!

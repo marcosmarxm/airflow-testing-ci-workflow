@@ -5,8 +5,8 @@
 This code is complementar to the article [How to develop data pipeline in Airflow through TDD (test-driven development)](https://blog.magrathealabs.com/how-to-develop-data-pipeline-in-airflow-through-tdd-test-driven-development-c3333439f358).
 I suggest you to read to better understand the code and the way I think how to setup the project.
 
-[Step-by-step: How to develop a DAG using TDD (english version)](https://github.com/marcosmarxm/airflow-testing-ci-workflow/blob/master/assets/how-to/create-dag-using-tdd.md)<br>
-[Passo-a-passo: Como desenvolver uma DAG usando TDD (portuguese version)](https://github.com/marcosmarxm/airflow-testing-ci-workflow/blob/master/assets/how-to/criar-dag-usando-tdd.md)
+[Step-by-step: How to develop a DAG using TDD (english version)](assets/how-to/create-dag-using-tdd.md)<br>
+[Passo-a-passo: Como desenvolver uma DAG usando TDD (portuguese version)](assets/how-to/criar-dag-usando-tdd.md)
 
 ## The project
 
