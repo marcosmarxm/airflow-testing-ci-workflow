@@ -10,7 +10,7 @@ git clone git@github.com:marcosmarxm/airflow-testing-ci-workflow.git
 git checkout tutorial
 ```
 
-Para tirar mais proveito você deva ter um conhecimento básico sobre Airflow, python e pytest.
+Para tirar mais proveito você deva ter um conhecimento básico sobre **Airflow**, **python** e **pytest**.
 Caso você não sabe, eu penso... que como vamos construindo aos poucos talvez você possa ir pesquisando e aprendendo os conceitos na hora.
 
 Relembrando do pipeline que iremos desenvolver:
@@ -29,13 +29,13 @@ Explicando cada task:
 ## Vamos começar!
 
 Primeiro vamos colocar nosso ambiente de desenvolvimento em pé.
-Caso você tenha dúvidas sobre o ambiente recomendo ler novamente o artigo [link](https://blog.magrathealabs.com/how-to-develop-data-pipeline-in-airflow-through-tdd-test-driven-development-c3333439f358). Você pode ver o código no arquivo `Makefile`.
+Caso você tenha dúvidas sobre o ambiente recomendo ler novamente o artigo [How to develop data pipeline in Airflow through TDD (test-driven development)](https://blog.magrathealabs.com/how-to-develop-data-pipeline-in-airflow-through-tdd-test-driven-development-c3333439f358). Você pode ver o código no arquivo `Makefile`.
 
 ```bash
 make setup
 ```
 
-irá demorar alguns minutos.
+Isso irá demorar alguns minutos.
 A imagem docker do Airflow 2.0 com o LocalExecutor está demorando para fazer a configuração inicial.
 Após a configuração inicial enviamos alguns comandos para o Airflow: criação de usuário, criação das conexões e criação das variáveis.
 
@@ -50,7 +50,7 @@ A primeira tarefa que iremos desenvolver é a `full_load_product_data`.
 Ela tem o objetivo de pegar os dados da tabela `products` do banco de dados `oltp-db` e transferir para o `olap-db`.
 Primeiro vamos criar nossos dados fake para nos guiar.
 Crie um arquivo no diretório `/data` chamado `products.csv`.
-Você pode pegar os dados do [arquivo fornecido como exemplo](../../data/products.csv).
+Você pode pegar os dados do [arquivo fornecido como exemplo no branch master](https://raw.githubusercontent.com/marcosmarxm/airflow-testing-ci-workflow/master/data/products.csv).
 Exemplo abaixo:
 
 |product_id|product_name         |product_category|
@@ -82,7 +82,7 @@ class TestSalesPipeline:
 
 **Refletindo**: O objetivo dessa tarefa é comparar os dados que estarão no banco `olap-db` na tabela `products` com os dados de amostra `/data/products.csv`.
 
-`olap_product_size`: é a variável que estou planejando que receba os valores que devem ser transferidos, provável que ela seja uma lista com valores ou um dataframe.
+`olap_product_size`: é a variável que estou planejando que receba os valores que devem ser transferidos, é provável que ela seja uma lista com valores ou um dataframe.
 Vamos começar com o mais básico possível:
 
 * Comparar nosso resultado `olap_product_size` e ver se ele tem todos os itens que esperamos que ele tenha. Como podemos ver nos dados de amostra `/data/products.csv` temos 5 entradas, por esse motivo queremos comparar o tamanho de `olap_product_size` com 5.
@@ -203,12 +203,11 @@ Explicando o que foi realizado:
 1. Criamos a **task** `load_full_products_data`, que é um PythonOperator. Um **Operator** é um conceito no Airflow  que consegue invocar comandos básicos/padronizados. Por exemplo o **PythonOperator** chama funções em `python` e o **PostgresOperator** consegue executar queries SQL porém não consegue transferir dados de um banco de dados para outro. Para mais informações recomendo ler a [documentação](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html?highlight=hook#operators).
 2. Criamos a função `transfer_oltp_olap`, que basicamente cria os dois hooks para executar a coleta dos dados no banco `oltp-db` para o `olap-db`. Por que não utilizamos um **PostgresOperator**? O motivo é que o operator só consegue executar a query no limite do banco que ele está associado, ele não transfere dados. Por isso utilizamos os hooks. Os _kwargs_ é uma convenção do Airflow para passar os argumentos em funções chamadas pelo **PythonOperator**.
 
-Após concluir a DAG podemos acessar o Airflow `localhost:8080` *admin/admin* e verificar que nossa primeira DAG estará lá!
+Após concluir a DAG podemos acessar o Airflow em http://localhost:8080, usando as credenciais *admin/admin*, e verificar que nossa primeira DAG estará lá!
 
 ![Our initial DAG](../images/our_initial_dag.png)
 
-Podemos ativá-la e executá-la no UI do Airflow.
-Teremos o seguinte erro:
+Ao ativá-la e executá-la no UI do Airflow, será registrado o seguint erro nos logs:
 
 ![Our initial DAG](../images/airflow_first_exec_error.png)
 
@@ -301,7 +300,7 @@ O teste irá retornar **FAILED**.
 
 Nós já criamos as duas tabelas, entretanto o banco de dados `oltp-db` não possui nenhum registro.
 Precisamos conseguir inserir os dados fake nele.
-Já criamos o arquivo `/data/products.csv` precisamos transportar os dados para dentro do `oltp-db`.
+Já criamos o arquivo `/data/products.csv`, mas precisamos transportar seus dados para dentro do `oltp-db`.
 A forma mais simples que me vem na mente é ler o arquivo *csv* usando a biblioteca _pandas_ e transferir os dados para o banco usando a API do _pandas_.
 
 ```python
@@ -330,8 +329,8 @@ class TestSalesPipeline:
         oltp_conn = oltp_hook.get_sqlalchemy_engine()
         sample_data = pd.read_csv('./data/products.csv')
         sample_data.to_sql(
-            name='products',        # name of sql table
-            con=oltp_conn,          # SQLalchemy connection
+            name='products',        # nome da tabela SQL
+            con=oltp_conn,          # conexão SQLalchemy
             if_exists='replace',    # garante que toda vez teremos os mesmos dados
             index=False             # não queremos salvar os indices do pandas no banco
         )
@@ -369,7 +368,7 @@ Para verificarmos realmente, podemos acessar o banco `olap-db` através do coman
 docker exec -ti olap-db psql -U root olap
 ```
 
-e depois executando `select * from products` teremos o seguinte resultado.
+e depois executando `select * from products;` teremos o seguinte resultado.
 
 ![Our first passed test output](../images/output_products.png)
 
@@ -472,11 +471,6 @@ from pandas._testing import assert_frame_equal
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 
-def execute_dag(dag_id, execution_date):
-    """Execute a DAG in a specific date this process wait for DAG run or fail to continue"""
-    subprocess.run(["airflow", "dags", "backfill", "-s", execution_date, dag_id])
-
-
 def insert_initial_data(tablename, hook):
     """This script will populate database with initial data to run job"""
     conn_engine = hook.get_sqlalchemy_engine()
@@ -522,8 +516,8 @@ class TestSalesPipeline:
 
 Nosso teste refatorado com funções que serão reaproveitadas nas próximas etapas.
 Está bem mais legível separado em funções.
-Tome um tempo e estude a mudança que ocorreram.
-Para quem está começando entender e desbravar esse processo de refatoração irá ajudar muito. (Se tiver uma dúvida cruel pode me enviar uma mensagem)
+Tome um tempo e estude as mudanças que ocorreram.
+Isso ajudará muito quem está começando entender e desbravar esse processo de refatoração. (Se tiver uma dúvida cruel pode me enviar uma mensagem)
 
 ## TASK: Load incremental purchases
 
@@ -532,7 +526,7 @@ A única diferença dela para anterior é que teremos uma condição na carga do
 Devemos apenas carregar os dados do dia de execução, `execution_date`.
 Primeiro vamos criar nosso arquivo com dados fake.
 Crie o arquivo `purchases.csv` dentro do diretório `/data`.
-Você pode pegar os dados do [arquivo fornecido como exemplo](../../data/purchases.csv).
+Você pode pegar os dados do [arquivo fornecido como exemplo](https://raw.githubusercontent.com/marcosmarxm/airflow-testing-ci-workflow/master/data/purchases.csv).
 
 |purchase_id|purchase_date|user_id|product_id|unit_price|quantity|total_revenue|
 |--------------|-------------|-------|----------|----------|--------|-------------|
@@ -547,7 +541,7 @@ Você pode pegar os dados do [arquivo fornecido como exemplo](../../data/purchas
 |9             |2020-01-15   |132    |225       |75        |1       |75           |
 |10            |2020-01-15   |188    |220       |35        |10      |350          |
 
-Abaixo temos nosso arquivo de teste (foram removidas as funções e importações para diminuir o tamanho).
+Abaixo temos nossa classe de teste (as outras funções e importações foram omitidas para diminuir o tamanho).
 Começamos novamente uma nova etapa de testes.
 
 ```python
@@ -582,7 +576,21 @@ A coluna dos dados que correspondem ao tempo se chama `purchase_date`.
 Então se analisarmos os dados de amostra temos apenas 3 entradas para data `2020-01-01`.
 Essa data já estamos utilizando quando chamamos nossa DAG, variável `date = '2020-01-01'`.
 
-Vou antecipar alguns passos que já fizemos com a DAG anterior. Vou criar a tabela purchases nos dois bancos de dados e popular o banco de dados `oltp-db` com os dados fake que criamos. Foram incluídas as linhas abaixo:
+Vou antecipar alguns passos que já fizemos com a DAG anterior. Vou criar a tabela `purchases` nos dois bancos de dados usando o arquivo `sql/init/create_purchases.sql`:
+
+```sql
+CREATE TABLE IF NOT EXISTS purchases (
+    purchase_id      INTEGER,
+    purchase_date    TEXT,
+    user_id          INTEGER,
+    product_id       INTEGER,
+    unit_price       REAL,
+    quantity         INTEGER,
+    total_revenue    REAL
+)
+```
+
+Depois, popular o banco de dados `oltp-db` com os dados fake que criamos. Foram incluídas as linhas abaixo:
 
 ```python
 # test_sales_pipeline
@@ -648,7 +656,7 @@ with DAG(dag_id='products_sales_pipeline',
         })
 ```
 
-Foi criada uma nova task PythonOperator chamada `load_incremental_purchases_data`. Ela reutiliza a função criada anteriormente.
+Foi criada uma nova task PythonOperator chamada `load_incremental_purchases_data`. Ela reutiliza a função `transfer_oltp_olap` criada anteriormente.
 As únicas diferenças foram a cláusula `where purchase_data = %s` e a edição da função para receber o parâmetro extra na consulta.
 A sintaxe `{{ ds }}` é uma convenção do Airflow para acessar variáveis de contexto.
 Existem diversas variáveis que podem ser acessadas dentro do contexto da DAG.
@@ -659,7 +667,7 @@ Nossa segunda task está concluída.
 Novamente podemos incrementar nosso teste para atender melhor o projeto.
 
 Nesse caso, vamos criar o arquivo com os dados esperados.
-Ao invés de copiar o arquivo `purchases.csv` como aconteceu com os dados de produtos, agora iremos apenas precisar de um subconjunto pertinente aos testes.
+Ao invés de copiar todo o arquivo `purchases.csv` como aconteceu com os dados de produtos, agora iremos apenas precisar de um subconjunto pertinente aos testes.
 Crie um novo arquivo chamado `purchases_2020-01-01.csv` dentro da pasta `expected`.
 
 |purchase_id|purchase_date|user_id|product_id|unit_price|quantity|total_revenue|
@@ -679,7 +687,7 @@ olap_purchases_size = olap_hook.get_records('select * from purchases')
 assert len(olap_purchases_size) == 3
 
 # new
-purchase_data = self.olap_hook.get_pandas_df('select * from purchases')
+purchase_data = olap_hook.get_pandas_df('select * from purchases')
 purchase_size = len(purchase_data)
 purchase_expected = output_expected_as_df(f'purchases_{date}')
 assert_frame_equal(purchase_data, purchase_expected)
@@ -699,14 +707,14 @@ Voltamos ao nosso arquivo de teste criando o novo teste para a tabela `join_purc
 ```python
 # test_sales_pipeline.py
 # ...
-purchase_data = self.olap_hook.get_pandas_df('select * from purchases')
+purchase_data = olap_hook.get_pandas_df('select * from purchases')
 purchase_size = len(purchase_data)
 purchase_expected = output_expected_as_df(f'purchases_{date}')
 assert_frame_equal(purchase_data, purchase_expected)
 assert purchase_size == 3
 
 # Test join_purchases_products
-purchases_products_size = self.olap_hook.get_pandas_df('select * from join_purchases_products')
+purchases_products_size = olap_hook.get_pandas_df('select * from join_purchases_products')
 assert len(purchases_products_size) == 3
 ```
 
